@@ -1,0 +1,15 @@
+node_modules/
+dist/
+corpus/build/
+corpus/src/latex/variants/
+corpus/src/latex/scratch/
+corpus/src/word/variants/
+corpus/src/word/base/unpacked/
+corpus/src/latex/figs/
+corpus/report.*
+tools/bin/
+tools/generate/.venv/
+*.log
+*.synctex.gz
+__pycache__/
+.DS_Store

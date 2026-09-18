@@ -1,0 +1,15 @@
+{
+  "name": "ieee-paper-check",
+  "private": true,
+  "packageManager": "pnpm@10.14.0",
+  "scripts": {
+    "build": "pnpm --filter @ieee-check/web build",
+    "check": "pnpm -r check && pnpm exec biome check packages",
+    "test": "node packages/core/scripts/validate.ts && node packages/cli/src/main.ts corpus/pdfs --quiet; rc=$?; test $rc -eq 1",
+    "corpus": "uv run tools/generate/make_corpus.py && uv run tools/generate/make_corpus_word.py",
+    "corpus:check": "uv run --project tools/generate ruff check tools/generate && uv run --project tools/generate ty check tools/generate"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.5.14"
+  }
+}
