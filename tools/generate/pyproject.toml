@@ -1,0 +1,9 @@
+[project]
+name = "ieee-corpus-gen"
+version = "0.1.0"
+description = "Dev-time corpus generator for the IEEE paper checker"
+requires-python = ">=3.11"
+dependencies = ["matplotlib", "reportlab", "pikepdf"]
+
+[dependency-groups]
+dev = ["ruff>=0.16", "ty>=0.0.1"]
