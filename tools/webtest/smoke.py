@@ -59,6 +59,14 @@ def main() -> int:
         print("viewer title:", page.locator("#v-title").inner_text())
         canvas_w = page.locator("#v-canvas").evaluate("el => el.width")
         hl_visible = page.locator("#v-hl").is_visible()
+        hl_top = page.locator("#v-hl").evaluate(
+            "el => el.getBoundingClientRect().top - document.getElementById('v-canvas').getBoundingClientRect().top"
+        )
+        canvas_h = page.locator("#v-canvas").evaluate("el => el.clientHeight")
+        print(f"highlight top offset: {hl_top:.0f}px of {canvas_h}px canvas")
+        # The title sits in the top quarter of page 1: a vertically
+        # mirrored highlight would land in the bottom quarter.
+        ok = ok and hl_top < canvas_h * 0.25
         page_label = page.locator("#v-page").inner_text()
         print(f"canvas width: {canvas_w}, highlight: {hl_visible}, page label: {page_label}")
         ok = ok and dialog.get_attribute("open") is not None and canvas_w > 500
@@ -66,6 +74,19 @@ def main() -> int:
         page.wait_for_timeout(200)
         print("viewer closed:", dialog.get_attribute("open") is None)
         ok = ok and dialog.get_attribute("open") is None
+
+        # Passing rows must be inert: no inline evidence, no click
+        # affordance, nothing to inspect on a green card.
+        pass_title = page.locator(".card.valid .check", has_text="Title capitalization").first
+        quiet = pass_title.locator(".evidence").count() == 0
+        viewable = pass_title.get_attribute("class") and "viewable" in (pass_title.get_attribute("class") or "")
+        print("pass-row quiet:", quiet, "viewable:", bool(viewable))
+        ok = ok and quiet and not viewable
+        pass_title.click()
+        page.wait_for_timeout(600)
+        pass_open = page.locator("#viewer").get_attribute("open") is not None
+        print("pass-row viewer opens:", pass_open)
+        ok = ok and not pass_open
 
         if errors:
             print("CONSOLE ERRORS:", errors[:5])

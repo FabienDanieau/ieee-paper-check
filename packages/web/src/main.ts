@@ -25,21 +25,25 @@ const pdfBytes = new Map<string, Uint8Array>();
 // Configure the pdf.js worker before any document is opened.
 pdfjs.GlobalWorkerOptions.workerSrc = workerUrl;
 
-const viewer = new PdfViewer(pdfjs, {
-  dialog: byId<HTMLDialogElement>("viewer"),
-  title: byId<HTMLSpanElement>("v-title"),
-  pageLabel: byId<HTMLSpanElement>("v-page"),
-  prev: byId<HTMLButtonElement>("v-prev"),
-  next: byId<HTMLButtonElement>("v-next"),
-  close: byId<HTMLButtonElement>("v-close"),
-  canvas: byId<HTMLCanvasElement>("v-canvas"),
-  hl: byId<HTMLDivElement>("v-hl"),
-}, (file) => pdfBytes.get(file));
+const viewer = new PdfViewer(
+  pdfjs,
+  {
+    dialog: byId<HTMLDialogElement>("viewer"),
+    title: byId<HTMLSpanElement>("v-title"),
+    pageLabel: byId<HTMLSpanElement>("v-page"),
+    prev: byId<HTMLButtonElement>("v-prev"),
+    next: byId<HTMLButtonElement>("v-next"),
+    close: byId<HTMLButtonElement>("v-close"),
+    canvas: byId<HTMLCanvasElement>("v-canvas"),
+    hl: byId<HTMLDivElement>("v-hl"),
+  },
+  (file) => pdfBytes.get(file),
+);
 
 // Clicking an evidence row opens the viewer on the referenced page,
 // with the highlight rectangle when the check knows the geometry.
 results.addEventListener("click", (e) => {
-  const row = (e.target as HTMLElement).closest<HTMLElement>(".check.has-evidence");
+  const row = (e.target as HTMLElement).closest<HTMLElement>(".check.viewable");
   if (row === null) return;
   const file = row.dataset.file;
   const page = row.dataset.page;
@@ -95,23 +99,27 @@ function reportCard(r: PaperReport): HTMLElement {
     const row = document.createElement("div");
     row.className = `check ${c.status.toLowerCase()}`;
     const label = CHECK_LABELS[id];
-    if (c.status === "PASS" && c.evidence.length === 0) {
+    // Only failures open the viewer: a passing check is inert so a
+    // green card reads as nothing to inspect.
+    const located = c.status === "FAIL" ? c.evidence.find((e) => e.page !== undefined) : undefined;
+    if (c.status === "PASS") {
+      // Passing checks stay quiet; the evidence (e.g. the found title
+      // or the References accounting) is one click away in the viewer.
       row.innerHTML = `<span class="mark">✓</span><span class="label">${esc(label)}</span>`;
     } else {
       const ev = c.evidence
         .map((e) => `${e.page ? `[p.${e.page}] ` : ""}${esc(e.detail)}`)
         .join("<br>");
-      row.innerHTML = `<span class="mark">${c.status === "PASS" ? "✓" : "✗"}</span><span class="label">${esc(label)}</span><span class="evidence">${ev}</span>`;
+      row.innerHTML = `<span class="mark">✗</span><span class="label">${esc(label)}</span><span class="evidence">${ev}</span>`;
       row.classList.add("has-evidence");
-      const located = c.evidence.find((e) => e.page !== undefined);
-      if (located !== undefined) {
-        row.classList.add("viewable");
-        row.title = "Click to view this page";
-        row.dataset.file = r.file;
-        row.dataset.page = String(located.page);
-        if (located.rect !== undefined) {
-          row.dataset.rect = JSON.stringify(located.rect);
-        }
+    }
+    if (located !== undefined) {
+      row.classList.add("viewable");
+      row.title = "Click to view this page";
+      row.dataset.file = r.file;
+      row.dataset.page = String(located.page);
+      if (located.rect !== undefined) {
+        row.dataset.rect = JSON.stringify(located.rect);
       }
     }
     grid.append(row);

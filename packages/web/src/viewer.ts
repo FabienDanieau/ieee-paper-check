@@ -82,11 +82,18 @@ export class PdfViewer {
       await p.render({ canvas, viewport }).promise;
 
       if (c.rect !== undefined) {
-        const [px, py] = viewport.convertToViewportPoint(c.rect.x, c.rect.y);
-        const [px2, py2] = viewport.convertToViewportPoint(
-          c.rect.x + c.rect.w,
-          c.rect.y + c.rect.h,
-        );
+        // Evidence rects are top-origin (y grows downward, as the
+        // checks extract them); pdf.js user space is bottom-origin.
+        // Flip before mapping to the viewport.
+        const [vx0, vy0, vx1, vy1] = viewport.viewBox;
+        const bY0 = vy0 ?? 0;
+        const pageH = (vy1 ?? 0) - bY0;
+        void vx0;
+        void vx1;
+        const userY0 = bY0 + (pageH - (c.rect.y + c.rect.h));
+        const userY1 = bY0 + (pageH - c.rect.y);
+        const [px, py] = viewport.convertToViewportPoint(c.rect.x, userY0);
+        const [px2, py2] = viewport.convertToViewportPoint(c.rect.x + c.rect.w, userY1);
         hl.style.left = `${Math.min(px, px2) - 4}px`;
         hl.style.top = `${Math.min(py, py2) - 4}px`;
         hl.style.width = `${Math.abs(px2 - px) + 8}px`;
