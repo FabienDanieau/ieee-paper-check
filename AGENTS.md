@@ -49,3 +49,6 @@ uv run --with playwright python tools/webtest/smoke.py
 - Follow kernel-style commits (imperative subject, detailed body,
   `Assisted-by: LLM` trailer when AI-assisted, no agent-added
   Signed-off-by).
+- Never commit on your own: always show the user the staged changes
+  and the proposed commit message, and wait for their explicit
+  approval before running git commit.
