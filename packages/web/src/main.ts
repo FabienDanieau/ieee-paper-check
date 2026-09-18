@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-import type { PaperReport } from "@ieee-check/core";
+import type { PaperReport, Rect } from "@ieee-check/core";
 import { CHECK_LABELS, CHECK_ORDER, DEFAULT_CONFIG, renderCsv, validate } from "@ieee-check/core";
 import * as pdfjs from "pdfjs-dist";
 import workerUrl from "pdfjs-dist/build/pdf.worker.min.mjs?url";
@@ -48,9 +48,9 @@ results.addEventListener("click", (e) => {
   const file = row.dataset.file;
   const page = row.dataset.page;
   if (file === undefined || page === undefined || !pdfBytes.has(file)) return;
-  let rect;
+  let rect: Rect | undefined;
   try {
-    rect = row.dataset.rect ? JSON.parse(row.dataset.rect) : undefined;
+    rect = row.dataset.rect ? (JSON.parse(row.dataset.rect) as Rect) : undefined;
   } catch {
     rect = undefined;
   }
