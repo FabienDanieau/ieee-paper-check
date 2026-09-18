@@ -27,6 +27,10 @@ at a glance.
 
 ### Web app (authors + chairs)
 
+Hosted on GitHub Pages: <https://fabiendanieau.github.io/ieee-paper-check/>
+
+Or run it locally:
+
 ```sh
 pnpm install
 pnpm --filter @ieee-check/web build
