@@ -3,6 +3,7 @@ import type { PaperReport } from "@ieee-check/core";
 import { CHECK_LABELS, CHECK_ORDER, DEFAULT_CONFIG, renderCsv, validate } from "@ieee-check/core";
 import * as pdfjs from "pdfjs-dist";
 import workerUrl from "pdfjs-dist/build/pdf.worker.min.mjs?url";
+import { PdfViewer } from "./viewer.ts";
 
 function byId<T extends HTMLElement>(id: string): T {
   const el = document.getElementById(id);
@@ -19,9 +20,38 @@ const csvBtn = byId<HTMLButtonElement>("csv-btn");
 const clearBtn = byId<HTMLButtonElement>("clear-btn");
 
 const reports: PaperReport[] = [];
+const pdfBytes = new Map<string, Uint8Array>();
 
 // Configure the pdf.js worker before any document is opened.
 pdfjs.GlobalWorkerOptions.workerSrc = workerUrl;
+
+const viewer = new PdfViewer(pdfjs, {
+  dialog: byId<HTMLDialogElement>("viewer"),
+  title: byId<HTMLSpanElement>("v-title"),
+  pageLabel: byId<HTMLSpanElement>("v-page"),
+  prev: byId<HTMLButtonElement>("v-prev"),
+  next: byId<HTMLButtonElement>("v-next"),
+  close: byId<HTMLButtonElement>("v-close"),
+  canvas: byId<HTMLCanvasElement>("v-canvas"),
+  hl: byId<HTMLDivElement>("v-hl"),
+}, (file) => pdfBytes.get(file));
+
+// Clicking an evidence row opens the viewer on the referenced page,
+// with the highlight rectangle when the check knows the geometry.
+results.addEventListener("click", (e) => {
+  const row = (e.target as HTMLElement).closest<HTMLElement>(".check.has-evidence");
+  if (row === null) return;
+  const file = row.dataset.file;
+  const page = row.dataset.page;
+  if (file === undefined || page === undefined || !pdfBytes.has(file)) return;
+  let rect;
+  try {
+    rect = row.dataset.rect ? JSON.parse(row.dataset.rect) : undefined;
+  } catch {
+    rect = undefined;
+  }
+  viewer.open(file, Number.parseInt(page, 10), rect);
+});
 
 function downloadCsv(): void {
   const blob = new Blob([renderCsv(reports)], { type: "text/csv" });
@@ -73,6 +103,16 @@ function reportCard(r: PaperReport): HTMLElement {
         .join("<br>");
       row.innerHTML = `<span class="mark">${c.status === "PASS" ? "✓" : "✗"}</span><span class="label">${esc(label)}</span><span class="evidence">${ev}</span>`;
       row.classList.add("has-evidence");
+      const located = c.evidence.find((e) => e.page !== undefined);
+      if (located !== undefined) {
+        row.classList.add("viewable");
+        row.title = "Click to view this page";
+        row.dataset.file = r.file;
+        row.dataset.page = String(located.page);
+        if (located.rect !== undefined) {
+          row.dataset.rect = JSON.stringify(located.rect);
+        }
+      }
     }
     grid.append(row);
   }
@@ -87,6 +127,9 @@ async function handleFiles(files: FileList | File[]): Promise<void> {
     try {
       // Await the WASM backend (already imported at module load).
       const bytes = new Uint8Array(await f.arrayBuffer());
+      // pdf.js transfers (detaches) the buffer passed to validate, so
+      // keep an independent copy for the viewer.
+      pdfBytes.set(f.name, bytes.slice());
       const r = await validate(bytes, f.name, DEFAULT_CONFIG);
       reports.push(r);
       card = reportCard(r);
@@ -129,6 +172,7 @@ dropzone.addEventListener("drop", (e) => {
 csvBtn.addEventListener("click", downloadCsv);
 clearBtn.addEventListener("click", () => {
   reports.length = 0;
+  pdfBytes.clear();
   results.replaceChildren();
   refreshActions();
 });

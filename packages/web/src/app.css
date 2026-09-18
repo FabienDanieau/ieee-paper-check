@@ -202,3 +202,55 @@ footer ul {
     grid-column: 2;
   }
 }
+
+/* viewer */
+.check.viewable { cursor: pointer; }
+.check.viewable:hover { background: #f0f4ff; }
+.check.viewable .label::after {
+  content: " ▸";
+  color: var(--muted);
+  font-size: 0.75em;
+}
+
+dialog#viewer {
+  width: min(920px, 94vw);
+  border: none;
+  border-radius: 12px;
+  padding: 0;
+  max-width: min(920px, 94vw);
+  background: var(--panel);
+  color: var(--ink);
+}
+dialog#viewer::backdrop {
+  background: rgba(20, 25, 40, 0.55);
+}
+.v-head {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  padding: 0.6rem 0.9rem;
+  border-bottom: 1px solid var(--line);
+}
+#v-title { font-weight: 600; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.v-nav { display: flex; align-items: center; gap: 0.4rem; color: var(--muted); font-size: 0.85rem; }
+.v-nav button, #v-close {
+  border: 1px solid var(--line);
+  background: var(--panel);
+  color: var(--ink);
+  border-radius: 6px;
+  width: 2rem;
+  height: 1.7rem;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+.v-nav button:disabled { opacity: 0.35; cursor: default; }
+.v-body { padding: 0.6rem; max-height: 82vh; overflow: auto; }
+#v-stage { position: relative; width: fit-content; margin: 0 auto; }
+#v-stage canvas { display: block; border: 1px solid var(--line); border-radius: 4px; }
+#v-hl {
+  position: absolute;
+  border: 2px solid #e63946;
+  background: rgba(230, 57, 70, 0.16);
+  border-radius: 3px;
+  pointer-events: none;
+}

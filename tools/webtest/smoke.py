@@ -49,6 +49,24 @@ def main() -> int:
             exp_badge, exp_fails = EXPECT[name]
             ok = ok and badge == exp_badge and fails == exp_fails
         print("summary:", page.locator("#summary").inner_text())
+
+        # Viewer: click the title-casing evidence row, expect the page-1
+        # render with a highlight box, then close and confirm cleanup.
+        page.locator(".check.fail.viewable", has_text="Title capitalization").first.click()
+        page.wait_for_timeout(800)
+        dialog = page.locator("#viewer")
+        print("viewer open:", dialog.get_attribute("open") is not None)
+        print("viewer title:", page.locator("#v-title").inner_text())
+        canvas_w = page.locator("#v-canvas").evaluate("el => el.width")
+        hl_visible = page.locator("#v-hl").is_visible()
+        page_label = page.locator("#v-page").inner_text()
+        print(f"canvas width: {canvas_w}, highlight: {hl_visible}, page label: {page_label}")
+        ok = ok and dialog.get_attribute("open") is not None and canvas_w > 500
+        page.locator("#v-close").click()
+        page.wait_for_timeout(200)
+        print("viewer closed:", dialog.get_attribute("open") is None)
+        ok = ok and dialog.get_attribute("open") is None
+
         if errors:
             print("CONSOLE ERRORS:", errors[:5])
         browser.close()

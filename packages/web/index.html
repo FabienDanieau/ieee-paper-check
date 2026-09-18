@@ -60,6 +60,24 @@
     <p class="license">MIT license · runs locally, offline-capable once loaded</p>
   </footer>
 
+  <dialog id="viewer" aria-label="PDF viewer">
+    <div class="v-head">
+      <span id="v-title"></span>
+      <span class="v-nav">
+        <button type="button" id="v-prev" aria-label="Previous page">‹</button>
+        <span id="v-page"></span>
+        <button type="button" id="v-next" aria-label="Next page">›</button>
+      </span>
+      <button type="button" id="v-close" aria-label="Close viewer">✕</button>
+    </div>
+    <div class="v-body">
+      <div id="v-stage">
+        <canvas id="v-canvas"></canvas>
+        <div id="v-hl" hidden></div>
+      </div>
+    </div>
+  </dialog>
+
   <script type="module" src="./src/main.ts"></script>
 </body>
 </html>
