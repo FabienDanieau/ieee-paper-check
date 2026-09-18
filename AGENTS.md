@@ -44,6 +44,8 @@ uv run --with playwright python tools/webtest/smoke.py
   README documents how the generators work.
 - Node >= 22.18 (built-in TS stripping) is required to run the CLI and
   harness without a build step.
+- Binary artifacts (corpus PDFs, template zips/docx) are git-LFS
+  tracked; never commit raw binaries matching those patterns.
 - Follow kernel-style commits (imperative subject, detailed body,
   `Assisted-by: LLM` trailer when AI-assisted, no agent-added
   Signed-off-by).

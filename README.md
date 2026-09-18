@@ -97,6 +97,16 @@ The `bad_title_smallcaps_lct` corpus entry is reserved for the optional
 `granite-docling-258M` WebGPU tier (transformers.js) that can visually
 classify the title image; the rest of the system never needs a model.
 
+## LFS
+
+Binary artifacts (corpus PDFs, IEEE template zips/docx) are tracked
+with [git LFS](https://git-lfs.com). After cloning:
+
+```sh
+git lfs install   # once per machine
+git lfs pull      # if the clone predates LFS or LFS was missing
+```
+
 ## Verification
 
 - TS: `pnpm -r check` (tsc --noEmit, strict) · Biome lint
