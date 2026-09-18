@@ -7,7 +7,6 @@ export default defineConfig({
   plugins: [
     VitePWA({
       registerType: "autoUpdate",
-      includeAssets: ["mupdf-wasm.wasm"],
       manifest: {
         name: "IEEE camera-ready checker",
         short_name: "ieee-check",
@@ -19,8 +18,7 @@ export default defineConfig({
         icons: [],
       },
       workbox: {
-        globPatterns: ["**/*.{js,css,html,wasm,svg,woff2}"],
-        maximumFileSizeToCacheInBytes: 20 * 1024 * 1024,
+        globPatterns: ["**/*.{js,css,html,svg,woff2}"],
       },
     }),
   ],

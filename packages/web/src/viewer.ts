@@ -85,11 +85,8 @@ export class PdfViewer {
         // Evidence rects are top-origin (y grows downward, as the
         // checks extract them); pdf.js user space is bottom-origin.
         // Flip before mapping to the viewport.
-        const [vx0, vy0, vx1, vy1] = viewport.viewBox;
-        const bY0 = vy0 ?? 0;
-        const pageH = (vy1 ?? 0) - bY0;
-        void vx0;
-        void vx1;
+        const bY0 = viewport.viewBox[1]!;
+        const pageH = viewport.viewBox[3]! - bY0;
         const userY0 = bY0 + (pageH - (c.rect.y + c.rect.h));
         const userY1 = bY0 + (pageH - c.rect.y);
         const [px, py] = viewport.convertToViewportPoint(c.rect.x, userY0);

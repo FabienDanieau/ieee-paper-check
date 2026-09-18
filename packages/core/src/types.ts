@@ -36,7 +36,7 @@ export interface CheckResult {
 export interface FontInfo {
   page: number;
   name: string;
-  subtype: string;
+  type3: boolean;
   embedded: boolean;
 }
 
@@ -104,35 +104,7 @@ export const DEFAULT_CONFIG: Config = {
     "with",
     "without",
   ],
-  acronyms: [
-    "IEEE",
-    "HPC",
-    "GPU",
-    "CPU",
-    "TPU",
-    "MPI",
-    "PDE",
-    "ODE",
-    "AI",
-    "ML",
-    "DL",
-    "SC",
-    "KV",
-    "SSD",
-    "NVM",
-    "OS",
-    "IO",
-    "IIoT",
-    "IoT",
-    "GNN",
-    "CNN",
-    "RNN",
-    "LSTM",
-    "SGD",
-    "QoS",
-    "SDN",
-    "NFV",
-    "VM",
-    "OS",
-  ],
+  // All-caps words of <= 5 letters are accepted automatically, so this
+  // list only needs acronyms a conference wants to allow above that.
+  acronyms: [],
 };

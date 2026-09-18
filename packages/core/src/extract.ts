@@ -88,7 +88,7 @@ export async function extractPaperData(bytes: Uint8Array): Promise<PaperData> {
       fonts.push({
         page: p,
         name: f.name,
-        subtype: f.isType3Font ? "/Type3" : "embedded",
+        type3: f.isType3Font,
         embedded: !f.missingFile,
       });
     }

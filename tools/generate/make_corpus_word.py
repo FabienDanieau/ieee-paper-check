@@ -57,10 +57,6 @@ TITLE_PARA_RE = re.compile(
     re.DOTALL,
 )
 
-FOOTER_NS_TAIL = (
-    ' mc:Ignorable="w14 w15 w16se w16cid w16 w16cex w16sdtdh wne wp14">'
-)
-
 PAGE_NUMBER_PARA = (
     "<w:p><w:pPr><w:pStyle w:val=\"Footer\"/><w:jc w:val=\"center\"/></w:pPr>"
     '<w:r><w:fldChar w:fldCharType="begin"/></w:r>'

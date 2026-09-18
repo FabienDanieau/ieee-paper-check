@@ -114,9 +114,8 @@ function findTitle(data: PaperData): TitleAnalysis {
   };
 }
 
-function casingProblems(title: string, config: Config): Evidence[] {
+function casingProblems(words: string[], config: Config): Evidence[] {
   const problems: Evidence[] = [];
-  const words = title.split(/\s+/).filter(Boolean);
   if (words.length === 0) {
     problems.push({ detail: "No title found on page 1" });
     return problems;
@@ -189,8 +188,9 @@ export function checkTitle(data: PaperData, config: Config): CheckResult {
     letters.length > 0
       ? letters.split("").filter((c) => c === c.toUpperCase()).length / letters.length
       : 0;
-  const words = title.text.split(/\s+/).filter((w) => /[A-Za-z]/.test(w));
-  const titleLooksAllCaps = upperRatio > 0.9 && words.length >= 3;
+  const words = title.text.split(/\s+/).filter(Boolean);
+  const wordCount = words.filter((w) => /[A-Za-z]/.test(w)).length;
+  const titleLooksAllCaps = upperRatio > 0.9 && wordCount >= 3;
   if (titleLooksAllCaps) {
     problems.push({
       page: 1,
@@ -200,7 +200,7 @@ export function checkTitle(data: PaperData, config: Config): CheckResult {
     });
   }
 
-  problems.push(...casingProblems(title.text, config));
+  problems.push(...casingProblems(words, config));
 
   for (const e of problems) {
     e.page = 1;
@@ -426,7 +426,7 @@ export function checkFontsEmbedded(data: PaperData): CheckResult {
 }
 
 export function checkFontsType3(data: PaperData): CheckResult {
-  const bad = data.fonts.filter((f) => f.subtype === "/Type3");
+  const bad = data.fonts.filter((f) => f.type3);
   if (bad.length === 0) {
     return result("fonts_type3", "PASS", []);
   }

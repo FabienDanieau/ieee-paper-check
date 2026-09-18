@@ -106,8 +106,6 @@ PARAGRAPHS = [
     "warrants further study."),
 ]
 
-SECTIONS_PER_BLOCK = 4
-
 
 def body(n_blocks: int) -> str:
     parts = [
