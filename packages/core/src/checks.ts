@@ -1,5 +1,21 @@
 // SPDX-License-Identifier: MIT
-import type { CheckId, CheckResult, Config, Evidence, PageLine, PaperData } from "./types.ts";
+import type { CheckId, CheckResult, Config, Evidence, PageLine, PaperData, Rect } from "./types.ts";
+
+function lineRect(l: PageLine): Rect {
+  return { x: l.x, y: l.y, w: l.w, h: l.h };
+}
+
+function unionRects(lines: PageLine[]): Rect | undefined {
+  if (lines.length === 0) return undefined;
+  const x = Math.min(...lines.map((l) => l.x));
+  const y = Math.min(...lines.map((l) => l.y));
+  return {
+    x,
+    y,
+    w: Math.max(...lines.map((l) => l.x + l.w)) - x,
+    h: Math.max(...lines.map((l) => l.y + l.h)) - y,
+  };
+}
 
 const result = (id: CheckId, status: CheckResult["status"], evidence: Evidence[]): CheckResult => ({
   id,
@@ -30,8 +46,13 @@ export function checkCopyright(data: PaperData): CheckResult {
   );
   const joined = zone.map((l) => l.text).join(" ");
   if (PLACEHOLDER_RE.test(joined)) {
+    const ph = zone.find((l) => PLACEHOLDER_RE.test(l.text));
     return result("copyright", "FAIL", [
-      { page: 1, detail: "Copyright placeholder (XXX-…) not replaced with real IEEE notice" },
+      {
+        page: 1,
+        detail: "Copyright placeholder (XXX-…) not replaced with real IEEE notice",
+        rect: ph ? lineRect(ph) : undefined,
+      },
     ]);
   }
   const ok =
@@ -46,6 +67,12 @@ export function checkCopyright(data: PaperData): CheckResult {
       detail:
         "No complete IEEE copyright block found in the bottom-left corner of page 1 " +
         "(expected e.g. 978-1-6654-1234-5/25/$31.00 © 2025 IEEE)",
+      rect: {
+        x: 36,
+        y: H * 0.85,
+        w: data.pageWidth * 0.5,
+        h: H * 0.15,
+      },
     },
   ]);
 }
@@ -57,6 +84,7 @@ const SMALL_CAPS_RE = /[\u1D00-\u1D7F]/;
 interface TitleAnalysis {
   text: string;
   fonts: Set<string>;
+  rect?: Rect;
 }
 
 function findTitle(data: PaperData): TitleAnalysis {
@@ -79,7 +107,11 @@ function findTitle(data: PaperData): TitleAnalysis {
     .filter((l) => l.size >= maxSize * 0.75 && l.y < boundaryY)
     .sort((a, b) => a.y - b.y || a.x - b.x);
   const fonts = new Set(candidates.map((l) => l.font));
-  return { text: candidates.map((l) => l.text.trim()).join(" "), fonts };
+  return {
+    text: candidates.map((l) => l.text.trim()).join(" "),
+    fonts,
+    rect: unionRects(candidates),
+  };
 }
 
 function casingProblems(title: string, config: Config): Evidence[] {
@@ -170,8 +202,14 @@ export function checkTitle(data: PaperData, config: Config): CheckResult {
 
   problems.push(...casingProblems(title.text, config));
 
+  for (const e of problems) {
+    e.page = 1;
+    e.rect = title.rect;
+  }
   if (problems.length === 0) {
-    return result("title", "PASS", [{ page: 1, detail: `Title: '${title.text}'` }]);
+    return result("title", "PASS", [
+      { page: 1, detail: `Title: '${title.text}'`, rect: title.rect },
+    ]);
   }
   return result("title", "FAIL", problems);
 }
@@ -189,6 +227,7 @@ export function checkArtifactAppendix(data: PaperData): CheckResult {
     {
       page: hits[0]!.page,
       detail: `Paper must not contain an Artifact Description/Evaluation section (found: '${hits[0]!.text.trim().slice(0, 80)}')`,
+      rect: lineRect(hits[0]!),
     },
   ]);
 }
@@ -218,6 +257,7 @@ export function checkAppendix(data: PaperData, config: Config): CheckResult {
     {
       page: heading.page,
       detail: `Appendices are not allowed in the paper (found heading: '${heading.text.trim().slice(0, 60)}' on page ${heading.page}); submit them separately`,
+      rect: lineRect(heading),
     },
   ]);
 }
@@ -237,6 +277,7 @@ export function checkAnonymized(data: PaperData): CheckResult {
     {
       page: 1,
       detail: `Paper must be de-anonymized for camera-ready (found: '${hits.map((h) => h.text.trim().slice(0, 60)).join(" / ")}')`,
+      rect: unionRects(hits),
     },
   ]);
 }
@@ -254,6 +295,7 @@ export function checkUndefinedRefs(data: PaperData): CheckResult {
     {
       page: all[0]!.page,
       detail: `Undefined references found (?? or [?]) on page(s) ${[...new Set(all.map((l) => l.page))].join(", ")}`,
+      rect: lineRect(all[0]!),
     },
   ]);
 }
@@ -363,6 +405,7 @@ export function checkPageNumbers(data: PaperData): CheckResult {
     {
       page: badPages[0],
       detail: `Pages must not be numbered (found page numbers on page(s) ${badPages.join(", ")}: '${hits[0]!.text.trim()}')`,
+      rect: lineRect(hits[0]!),
     },
   ]);
 }

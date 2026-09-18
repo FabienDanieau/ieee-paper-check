@@ -13,9 +13,18 @@ export type CheckId =
 
 export type CheckStatus = "PASS" | "FAIL";
 
+export interface Rect {
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+}
+
 export interface Evidence {
   page?: number;
   detail: string;
+  /** Location of the evidence on the page (top-origin coordinates). */
+  rect?: Rect;
 }
 
 export interface CheckResult {
