@@ -1,0 +1,61 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: true
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Types + lint (tsc, biome)
+        run: pnpm check
+      - name: Corpus validation harness + CLI batch
+        run: pnpm test
+      - uses: astral-sh/setup-uv@v5
+        with:
+          python-version: "3.12"
+      - name: Python generators (ruff + ty)
+        run: pnpm corpus:check
+      - name: Web app build
+        run: pnpm --filter @ieee-check/web build
+
+  browser-smoke:
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: true
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Build the web app
+        run: pnpm --filter @ieee-check/web build
+      - uses: astral-sh/setup-uv@v5
+        with:
+          python-version: "3.12"
+      - name: Install headless Chromium for Playwright
+        run: uv run --with playwright python -m playwright install chromium --with-deps
+      - name: Serve the built app and run the smoke test
+        run: |
+          pnpm --filter @ieee-check/web preview --port 4173 &
+          sleep 5
+          uv run --with playwright python tools/webtest/smoke.py
