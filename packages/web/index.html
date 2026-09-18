@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="color-scheme" content="light" />
+  <title>IEEE camera-ready checker</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='16' fill='%230b3d91'/%3E%3Cpath d='M28 30h44M28 50h30M28 70h38' stroke='white' stroke-width='9' stroke-linecap='round'/%3E%3C/svg%3E" />
+  <link rel="stylesheet" href="./src/app.css" />
+</head>
+<body>
+  <header>
+    <h1>IEEE camera-ready checker</h1>
+    <p class="tagline">
+      10 automated checks for camera-ready papers.
+      <strong>Your PDF is analysed entirely inside this page</strong> — nothing is
+      uploaded, nothing leaves your computer.
+    </p>
+  </header>
+
+  <button id="dropzone" type="button" aria-label="Choose or drop PDF files">
+    <div class="dz-inner">
+      <div class="dz-icon">📄</div>
+      <div class="dz-text">
+        <span class="dz-main">Drop one or more PDFs here</span>
+        <span class="dz-alt">or click to choose files</span>
+      </div>
+    </div>
+  </button>
+  <input id="file-input" type="file" accept="application/pdf" multiple hidden />
+
+  <div id="actions" hidden>
+    <span id="summary"></span>
+    <button id="csv-btn" type="button" class="btn">Download CSV</button>
+    <button id="clear-btn" type="button" class="btn ghost">Clear</button>
+  </div>
+
+  <main id="results"></main>
+
+  <footer>
+    <details>
+      <summary>What is checked, and known limits</summary>
+      <ul>
+        <li>IEEE copyright block at the bottom-left of page 1</li>
+        <li>Title capitalization: main words capitalized, small words lowercase, no small caps, no ALL CAPS</li>
+        <li>No "Artifact Description / Artifact Evaluation" sections in the PDF</li>
+        <li>No appendix inside the paper (submit separately)</li>
+        <li>Paper must be de-anonymized (author names present)</li>
+        <li>No unresolved LaTeX references (?? or [?])</li>
+        <li>Content within 12 pages, references may spill past the limit</li>
+        <li>No page numbers in headers or footers</li>
+        <li>All fonts embedded; Type 3 fonts forbidden</li>
+      </ul>
+      <p class="limit">
+        Known limit: a title set in small caps with a fully lowercase text layer
+        (Word's native PDF export) cannot be distinguished from normal casing by
+        geometry alone. All other small-cap variants are detected.
+      </p>
+    </details>
+    <p class="license">MIT license · runs locally, offline-capable once loaded</p>
+  </footer>
+
+  <script type="module" src="./src/main.ts"></script>
+</body>
+</html>
