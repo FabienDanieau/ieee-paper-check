@@ -21,7 +21,8 @@ so tests run without them):
 pnpm corpus       # regenerates corpus/pdfs + ground-truth.json
 ```
 
-Web app (GitHub Pages target):
+Web app (GitHub Pages target; the deploy workflow only runs on the
+conference fork hephtaicie/ieee-paper-check, never upstream):
 
 ```sh
 pnpm build                            # vite build + PWA

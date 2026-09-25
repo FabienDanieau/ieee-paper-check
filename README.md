@@ -27,7 +27,8 @@ at a glance.
 
 ### Web app (authors + chairs)
 
-Hosted on GitHub Pages: <https://fabiendanieau.github.io/ieee-paper-check/>
+Hosted on GitHub Pages (maintained by the conference fork):
+<https://hephtaicie.github.io/ieee-paper-check/>
 
 Or run it locally:
 
@@ -37,7 +38,11 @@ pnpm --filter @ieee-check/web build
 pnpm --filter @ieee-check/web preview
 ```
 
-or deploy to GitHub Pages (workflow in `.github/workflows/deploy.yml`).
+The deploy workflow (`.github/workflows/deploy.yml`) is gated on the
+repository owner: only the conference fork
+([hephtaicie/ieee-paper-check](https://github.com/hephtaicie/ieee-paper-check))
+publishes the public page; other forks and clones run the app locally
+or wire their own Pages site.
 Drop one or many PDFs onto the page; download the CSV report for batches.
 The app is a PWA: once loaded it works fully offline, and the analysis
 always stays inside the browser tab.

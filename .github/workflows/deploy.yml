@@ -17,6 +17,9 @@ concurrency:
 
 jobs:
   build:
+    # The conference fork (hephtaicie/ieee-paper-check) hosts the public
+    # page; upstream never deploys.
+    if: github.repository_owner == 'hephtaicie'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
